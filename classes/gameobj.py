@@ -32,6 +32,7 @@ class PastelColors(Enum):
     LIGHT_CYAN = (224, 255, 255)
     LIGHT_MAGENTA = (255, 192, 203)
 
+
 class GameObject:
     def __init__(self, location: tuple, color=None, z_index=0):
         self.location = location
@@ -48,6 +49,19 @@ class GameObject:
 
     def randomize_color(self) -> None:
         self.color = self.random_pastel_color()
+
+    @staticmethod
+    def interpolate_colors(objs: list):
+        colors = [obj.color for obj in objs]
+        sumr = sum([color[0] for color in colors])
+        sumg = sum([color[1] for color in colors])
+        sumb = sum([color[2] for color in colors])
+
+        r = sumr // len(colors) if sumr > 0 else 0
+        g = sumg // len(colors) if sumg > 0 else 0
+        b = sumb // len(colors) if sumb > 0 else 0
+
+        return r, g, b
 
     @staticmethod
     def random_pastel_color() -> tuple:
