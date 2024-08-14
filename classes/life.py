@@ -34,7 +34,9 @@ class Game:
             self.screen.draw(self.grid.get_gameobjs())
 
             # Set window title
-            pygame.display.set_caption(f"Conway's Game of Life - Rule: {self.config.rule["name"]}({self.config.rule["rulestring"]}) - Speed: {self.config.speed} - Paused: {self.paused}")
+            pygame.display.set_caption(
+                f"Conway's Game of Life - Rule: {self.config.rule["name"]}({self.config.rule["rulestring"]}) - Speed: {self.config.speed} - Paused: {self.paused} - Time to next rule {(self.config.get_ruleset_time() - self.rule_elapsed_time)//1000}"
+            )
 
     def setup(self):
         self.grid.clear()

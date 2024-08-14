@@ -14,7 +14,7 @@ class Rules:
         self.CONWAY = {
             "rulestring": "B3/S23",
             "name": "Conway's Game of Life",
-            "ruletime": 10 * TimeHelpers.MINUTE.value
+            "ruletime": 5 * TimeHelpers.MINUTE.value
         }
         self.HIGH_LIFE = {
             "rulestring": "B23/S36",
@@ -29,7 +29,7 @@ class Rules:
         self.MAZE = {
             "rulestring": "B3/S12345",
             "name": "Maze",
-            "ruletime": 10 * TimeHelpers.SECOND.value
+            "ruletime": 2 * TimeHelpers.MINUTE.value
         }
         self.MAZECTRIC = {
             "rulestring": "B3/S1234",
@@ -71,11 +71,10 @@ class Config:
         self.background = (0, 0, 0)
         self.rules = Rules()
         self.rulecycle = cycle(self.rules.collection)
-        self.rule = self.rules["Conway's Game of Life"]
+        self.rule = next(self.rulecycle)
 
     def cycle_rule(self):
         self.rule = next(self.rulecycle)
-        print(self.rule)
 
     #def random_rule(self):
     #    self.rule = choice(self.rules)
