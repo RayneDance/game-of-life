@@ -12,17 +12,19 @@ class Game:
         self.paused = False
         self.rule_start_time = None
         self.rule_elapsed_time = None
-        self.cycle_rules = False
+        self.reset_time = 10*1000
+        self.reset_time_start = 0
+        self.reset_time_delta = 0
+        self.reset = False
 
     def run(self):
         while self.running:
             self.clock.tick(self.config.speed)
             self.rule_elapsed_time = pygame.time.get_ticks() - self.rule_start_time
             if self.rule_elapsed_time >= self.config.get_ruleset_time():
-                if self.cycle_rules:
+                if self.config.cycle:
                     print("Changing rule...")
-                    self.config.rule_order.next_rule()
-                    self.config.rule = self.config.rule_order.current_rule()
+                    self.config.cycle_rule()
                     print(f"New rule: {self.config.rule}")
                     self.setup()
 
@@ -32,13 +34,15 @@ class Game:
             self.screen.draw(self.grid.get_gameobjs())
 
             # Set window title
-            pygame.display.set_caption(f"Conway's Game of Life - Rule: {self.config.get_rule_string()} - Speed: {self.config.speed} - Paused: {self.paused}")
+            pygame.display.set_caption(f"Conway's Game of Life - Rule: {self.config.rule["name"]} - Speed: {self.config.speed} - Paused: {self.paused}")
 
     def setup(self):
         self.grid.clear()
         self.rule_start_time = pygame.time.get_ticks()
         self.rule_elapsed_time = 0
-        if self.config.rule == config.Rules.BLINKERS:
+        self.reset = False
+        self.reset_time_delta = 0
+        if self.config.rule["name"] == "Blinkers":
             print("Displaying blinkers")
             self.display_blinkers()
         else:
@@ -55,9 +59,9 @@ class Game:
                     self.paused = not self.paused
                 if event.key == pygame.K_F3:
                     self.setup()
-                if event.key == pygame.K_F4:
-                    self.config.random_rule()
-                    self.setup()
+                #if event.key == pygame.K_F4:
+                    #self.config.random_rule()
+                    #self.setup()
                 if event.key == pygame.K_F5:
                     self.config.set_rule(self.config.Rules.blinkers)
 
@@ -106,8 +110,9 @@ class Game:
     def update(self):
         # Simulate based on rule
         new_grid = [[0 for _ in range(self.config.grid_width)] for _ in range(self.config.grid_height)]
-        birth_conditions = list(map(int, self.config.rule.value.split("/")[0][1:]))
-        survive_conditions = list(map(int, self.config.rule.value.split("/")[1][1:]))
+        birth_conditions = list(map(int, self.config.rule["rulestring"].split("/")[0][1:]))
+        survive_conditions = list(map(int, self.config.rule["rulestring"].split("/")[1][1:]))
+        self.reset_time_delta = pygame.time.get_ticks() - self.reset_time_start
         for y in range(self.config.grid_height):
             for x in range(self.config.grid_width):
                 neighbors = self.get_neighbors(x, y)
@@ -119,12 +124,19 @@ class Game:
                             color=gameobj.GameObject.interpolate_colors(neighbors)
                         )
                 elif neighbor_count not in survive_conditions:
-                    old_obj = self.grid.grid[y][x]
-                    del old_obj
                     new_grid[y][x] = 0
                 else:
                     new_grid[y][x] = self.grid.grid[y][x]
         self.grid.grid = new_grid
+        if self.grid.check_history() and not self.reset:
+            self.reset = True
+            self.reset_time_start = pygame.time.get_ticks()
+
+        if self.reset and self.reset_time_delta >= self.reset_time:
+            print("Resetting grid...")
+            self.setup()
+        #self.grid.history.add(self.grid.grid)
+
 
     def get_neighbors(self, x, y):
         neighbors = []
