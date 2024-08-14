@@ -18,12 +18,16 @@ class Grid:
         self.grid = [[0 for _ in range(self.config.grid_width)] for _ in range(self.config.grid_height)]
 
     def check_history(self):
-        return False
-        for grid in self.history.history:
-            for x in range(len(grid)):
-                for y in range(len(grid[x])):
-                    if grid[x][y] != self.grid[y][x]:
-                        return False
+        # Flatten grid to 1D list
+        # Replace all objects with a 1
+        flat = [1 if self.grid[y][x] != 0 else 0 for y in range(self.config.grid_height) for x in range(self.config.grid_width)]
+
+        # Check if grid is in history
+        if flat in self.history.history:
+            return True
+        else:
+            self.history.add(flat)
+            return False
 
 class GridHistory:
     def __init__(self, max_length=20):
@@ -31,7 +35,6 @@ class GridHistory:
         self.history = []
 
     def add(self, grid):
-        self.history.append([[0 for _ in range(len(grid[0]))] for _ in range(len(grid))])
-        for y in range(len(grid)):
-            for x in range(len(grid[y])):
-                self.history[-1][x][y] = 0 if grid[y][x] == 0 else 1
+        if len(self.history) >= self.max_length:
+            self.history.pop(0)
+        self.history.append(grid)

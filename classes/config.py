@@ -71,7 +71,7 @@ class Config:
         self.background = (0, 0, 0)
         self.rules = Rules()
         self.rulecycle = cycle(self.rules.collection)
-        self.rule = self.rules["Blinkers"]
+        self.rule = self.rules["Conway's Game of Life"]
 
     def cycle_rule(self):
         self.rule = next(self.rulecycle)
